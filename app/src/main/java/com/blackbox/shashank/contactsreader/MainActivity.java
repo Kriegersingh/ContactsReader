@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.blackbox.shashank.contactsreader.Models.ContactsModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -34,6 +36,11 @@ public class MainActivity extends AppCompatActivity {
     List<ContactsModel> list;
     ListView listView;
     SimpleCursorAdapter simpleCursorAdapter;
+    String name,phonenumber;
+    ArrayList<String> contactList;
+    ArrayList<String> contactId;
+    String id;
+    ArrayAdapter<String> arrayAdapter;
 
 
     @Override
@@ -43,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         listView = findViewById(R.id.list);
+        contactList=new ArrayList<>();
+        contactId =new ArrayList<>();
+
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -59,7 +69,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
+                String contact_id=contactId.get(i).toString();
+
                 Intent intent = new Intent(MainActivity.this, Details.class);
+                intent.putExtra("contactId",contact_id);
                 startActivity(intent);
             }
         });
@@ -112,14 +125,31 @@ public class MainActivity extends AppCompatActivity {
     public void get(){
 
         Cursor cursor =getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,null,null,null);
-        startManagingCursor(cursor);
+        while (cursor.moveToNext()) {
 
-        String[] from={ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,ContactsContract.CommonDataKinds.Phone.NUMBER,ContactsContract.CommonDataKinds.Phone._ID};
+            name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
 
-        int [] to ={android.R.id.text1,android.R.id.text2};
-        simpleCursorAdapter =new SimpleCursorAdapter(this,android.R.layout.simple_list_item_2,cursor,from,to);
+            phonenumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
-        listView.setAdapter(simpleCursorAdapter);
+            id=cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY));
+
+            contactList.add(name + " "  + ":" + " " + phonenumber);
+            contactId.add(id);
+
+        }
+
+        cursor.close();
+
+
+        arrayAdapter= new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_2,android.R.id.text2,contactList);
+
+//        String[] from={ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,ContactsContract.CommonDataKinds.Phone.NUMBER,ContactsContract.CommonDataKinds.Phone._ID};
+//
+//        int [] to ={android.R.id.text1,android.R.id.text2};
+//        simpleCursorAdapter =new SimpleCursorAdapter(this,android.R.layout.simple_list_item_2,cursor,from,to);
+//
+//        listView.setAdapter(simpleCursorAdapter);
+        listView.setAdapter(arrayAdapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
 
