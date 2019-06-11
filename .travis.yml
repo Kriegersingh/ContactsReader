@@ -31,8 +31,8 @@ android:
     - sys-img-x86-android-26
     - sys-img-armeabi-v7a-android-17
     
-    licenses:
-    - 'android-sdk-license-.+'
+    #licenses:
+    #- 'android-sdk-license-.+'
 
     before_install:
     - yes | sdkmanager "platforms;android-28"
